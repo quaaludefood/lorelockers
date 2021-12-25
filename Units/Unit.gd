@@ -19,6 +19,7 @@ var is_selected := false setget set_is_selected
 
 var _is_walking := false setget _set_is_walking
 var can_attack := true setget set_can_attack
+var can_move := true setget set_can_move
 
 export var is_friendly := true 
 
@@ -26,12 +27,10 @@ onready var _sprite: Sprite = $PathFollow2D/Sprite
 onready var _anim_player: AnimationPlayer = $AnimationPlayer
 onready var _path_follow: PathFollow2D = $PathFollow2D
 
-
-
-
 func _ready() -> void:
 	set_process(false)
 
+	print(self.get_name(), "unit _ready!")
 	self.cell = grid.calculate_grid_coordinates(position)
 	position = grid.calculate_map_position(cell)
 	
@@ -51,6 +50,7 @@ func _process(delta: float) -> void:
 		position = grid.calculate_map_position(cell)
 		curve.clear_points()
 		emit_signal("walk_finished")
+		self.set_can_move(false)
 		print(self.get_name(), "- walk_finished ")
 
 func set_cell(value: Vector2) -> void:
@@ -64,6 +64,10 @@ func set_is_selected(value: bool) -> void:
 	else:
 		_anim_player.play("idle")
 
+func set_can_move(value: bool) -> void:
+	can_move = value
+	print(self.get_name(), "- can move is: ", self.can_move)
+	
 func set_can_attack(value: bool) -> void:
 	can_attack = value
 	print(self.get_name(), "- can attack is: ", self.can_attack)
@@ -86,6 +90,7 @@ func set_skin_offset(value: Vector2) -> void:
 func _set_is_walking(value: bool) -> void:
 	_is_walking = value
 	set_process(_is_walking)
+
 
 
 func _on_AttackButton_has_attacked() -> void:

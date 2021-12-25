@@ -9,3 +9,4 @@ func _on_Button_button_up() -> void:
 	for object in gameboard.get_children():
 		if object.is_class("Path2D"):
 			object.set_can_attack(true)
+			object.set_can_move(true)
