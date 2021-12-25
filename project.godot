@@ -9,10 +9,25 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Button",
+"class": "AttackButton",
+"language": "GDScript",
+"path": "res://UserInterface/AttackButton.gd"
+}, {
+"base": "Node",
+"class": "CombatAction",
+"language": "GDScript",
+"path": "res://CombatAction/CombatAction.gd"
+}, {
 "base": "Node2D",
 "class": "Cursor",
 "language": "GDScript",
 "path": "res://GameBoard/Cursor/Cursor.gd"
+}, {
+"base": "Button",
+"class": "EndTurnButton",
+"language": "GDScript",
+"path": "res://UserInterface/EndTurnButton.gd"
 }, {
 "base": "Node2D",
 "class": "GameBoard",
@@ -45,7 +60,10 @@ _global_script_classes=[ {
 "path": "res://GameBoard/UnitPath.gd"
 } ]
 _global_script_class_icons={
+"AttackButton": "",
+"CombatAction": "",
 "Cursor": "",
+"EndTurnButton": "",
 "GameBoard": "",
 "Grid": "",
 "PathFinder": "",

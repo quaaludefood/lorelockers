@@ -8,27 +8,25 @@ extends Path2D
 ## Emitted when the unit reached the end of a path along which it was walking.
 signal walk_finished
 
-## Shared resource of type Grid, used to calculate map coordinates.
 export var grid: Resource
-## Texture representing the unit.
 export var skin: Texture setget set_skin
-## Distance to which the unit can walk in cells.
 export var move_range := 6
-## Offset to apply to the `skin` sprite in pixels.
 export var skin_offset := Vector2.ZERO setget set_skin_offset
-## The unit's move speed when it's moving along a path.
 export var move_speed := 600.0
 
-## Coordinates of the current cell the cursor moved to.
 var cell := Vector2.ZERO setget set_cell
-## Toggles the "selected" animation on the unit.
 var is_selected := false setget set_is_selected
 
 var _is_walking := false setget _set_is_walking
+var can_attack := true setget set_can_attack
+
+export var is_friendly := true 
 
 onready var _sprite: Sprite = $PathFollow2D/Sprite
 onready var _anim_player: AnimationPlayer = $AnimationPlayer
 onready var _path_follow: PathFollow2D = $PathFollow2D
+
+
 
 
 func _ready() -> void:
@@ -36,11 +34,12 @@ func _ready() -> void:
 
 	self.cell = grid.calculate_grid_coordinates(position)
 	position = grid.calculate_map_position(cell)
-
+	
 	# We create the curve resource here because creating it in the editor prevents us from
 	# moving the unit.
 	if not Engine.editor_hint:
 		curve = Curve2D.new()
+		
 
 
 func _process(delta: float) -> void:
@@ -52,20 +51,7 @@ func _process(delta: float) -> void:
 		position = grid.calculate_map_position(cell)
 		curve.clear_points()
 		emit_signal("walk_finished")
-
-
-## Starts walking along the `path`.
-## `path` is an array of grid coordinates that the function converts to map coordinates.
-func walk_along(path: PoolVector2Array) -> void:
-	if path.empty():
-		return
-
-	curve.add_point(Vector2.ZERO)
-	for point in path:
-		curve.add_point(grid.calculate_map_position(point) - position)
-	cell = path[-1]
-	self._is_walking = true
-
+		print(self.get_name(), "- walk_finished ")
 
 func set_cell(value: Vector2) -> void:
 	cell = grid.clamp(value)
@@ -77,6 +63,10 @@ func set_is_selected(value: bool) -> void:
 		_anim_player.play("selected")
 	else:
 		_anim_player.play("idle")
+
+func set_can_attack(value: bool) -> void:
+	can_attack = value
+	print(self.get_name(), "- can attack is: ", self.can_attack)
 
 
 func set_skin(value: Texture) -> void:
@@ -96,3 +86,17 @@ func set_skin_offset(value: Vector2) -> void:
 func _set_is_walking(value: bool) -> void:
 	_is_walking = value
 	set_process(_is_walking)
+
+
+func _on_AttackButton_has_attacked() -> void:
+	set_can_attack(false)
+
+func walk_along(path: PoolVector2Array) -> void:
+	if path.empty():
+		return
+
+	curve.add_point(Vector2.ZERO)
+	for point in path:
+		curve.add_point(grid.calculate_map_position(point) - position)
+	cell = path[-1]
+	self._is_walking = true

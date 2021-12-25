@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Units/Unit.gd" type="Script" id=1]
 [ext_resource path="res://GameBoard/Grid.tres" type="Resource" id=2]
 [ext_resource path="res://Units/unit_shadow.svg" type="Texture" id=3]
+[ext_resource path="res://UserInterface/AttackButton.tscn" type="PackedScene" id=4]
 
 [sub_resource type="Animation" id=1]
 length = 0.001
@@ -44,6 +45,12 @@ grid = ExtResource( 2 )
 rotate = false
 loop = false
 
+[node name="AttackButton" parent="PathFollow2D" instance=ExtResource( 4 )]
+margin_top = -133.0
+margin_right = 150.0
+margin_bottom = -98.0
+text = "Attack!"
+
 [node name="Shadow" type="Sprite" parent="PathFollow2D"]
 modulate = Color( 0.101961, 0.109804, 0.0901961, 0.329412 )
 position = Vector2( 0, 5.43238 )
@@ -58,3 +65,6 @@ offset = Vector2( -3.8147e-06, -185 )
 autoplay = "idle"
 anims/idle = SubResource( 1 )
 anims/selected = SubResource( 2 )
+
+[connection signal="walk_finished" from="." to="PathFollow2D/AttackButton" method="_on_Unit_walk_finished"]
+[connection signal="has_attacked" from="PathFollow2D/AttackButton" to="." method="_on_AttackButton_has_attacked"]
