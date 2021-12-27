@@ -9,12 +9,10 @@ func _ready()-> void:
 
 
 func _on_AttackButton_button_up() -> void:
-	print("Clicked!")
 	emit_signal("has_attacked")
 	
 
 
 
 func _on_Unit_walk_finished() -> void:
-	print("walk finished!")
 	self.visible = true

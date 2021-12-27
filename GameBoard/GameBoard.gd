@@ -12,16 +12,27 @@ export var grid: Resource
 ## Mapping of coordinates of a cell to a reference to the unit it contains.
 var _units := {}
 var _active_unit: Unit
+var _last_moved_unit: Unit
+var _active_unit_starting_position :=  Vector2.ZERO
 var _walkable_cells := []
 
 onready var _unit_overlay: UnitOverlay = $UnitOverlay
 onready var _unit_path: UnitPath = $UnitPath
+onready var _undobutton: Button = get_node("../../UserInterface/UndoButton")
 
 
 func _ready() -> void:
 	_reinitialize()
+	_undobutton.connect("undo_pressed", self, "undo_move")
 
-
+func undo_move()-> void:
+	
+	_units.erase(_last_moved_unit.cell)
+	_last_moved_unit.position = _active_unit_starting_position
+	_last_moved_unit.cell = grid.calculate_grid_coordinates(_active_unit_starting_position)
+	_last_moved_unit.set_can_move(true)
+	_units[_last_moved_unit.cell] = _last_moved_unit
+	
 func _unhandled_input(event: InputEvent) -> void:
 	if _active_unit and event.is_action_pressed("ui_cancel"):
 		_deselect_active_unit()
@@ -43,6 +54,7 @@ func is_occupied(cell: Vector2) -> bool:
 ## Returns an array of cells a given unit can walk using the flood fill algorithm.
 func get_walkable_cells(unit: Unit) -> Array:
 	var array := []
+	print(" get_walkable_cells - unit can move" , unit.can_move)
 	if unit.can_move:
 		array = _flood_fill(unit.cell, unit.move_range)
 	else: 
@@ -96,11 +108,14 @@ func _move_active_unit(new_cell: Vector2) -> void:
 	if is_occupied(new_cell) or not new_cell in _walkable_cells:
 		return
 	# warning-ignore:return_value_discarded
+	
+	_active_unit_starting_position = grid.calculate_map_position(_active_unit.cell)
+	_last_moved_unit = _active_unit
 	_units.erase(_active_unit.cell)
 	_units[new_cell] = _active_unit
 	_deselect_active_unit()
 	_active_unit.walk_along(_unit_path.current_path)
-	yield(_active_unit, "walk_finished")
+	yield(_active_unit, "walk_finished")	
 	_clear_active_unit()
 
 
@@ -108,7 +123,7 @@ func _move_active_unit(new_cell: Vector2) -> void:
 ## Sets it as the `_active_unit` and draws its walkable cells and interactive move path. 
 func _select_unit(cell: Vector2) -> void:
 	if not _units.has(cell):
-		return
+		return	
 
 	_active_unit = _units[cell]
 	_active_unit.is_selected = true
