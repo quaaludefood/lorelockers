@@ -86,11 +86,6 @@ func _set_is_walking(value: bool) -> void:
 	set_process(_is_walking)
 
 
-
-func _on_AttackButton_has_attacked() -> void:
-	set_can_attack(false)
-
-
 	
 func walk_along(path: PoolVector2Array) -> void:
 	if path.empty():

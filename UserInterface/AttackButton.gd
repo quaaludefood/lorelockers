@@ -1,18 +1,20 @@
 class_name AttackButton
 extends Button
 
-signal has_attacked
+onready var rootnode: Node2D = get_tree().root.get_child(0)
+onready var gameboard: GameBoard = rootnode.get_node("UserInterface/GameBoard")
 
-func _ready()-> void:
-	self.visible = false
-	
+#func _on_Button_button_up() -> void:
+#	print(gameboard)		
+#	for object in gameboard.get_children():
+#		if object.is_class("Path2D"):
+#			object.set_can_attack(true)
+#			object.set_can_move(true)
+#
 
 
 func _on_AttackButton_button_up() -> void:
-	emit_signal("has_attacked")
-	
+	print("Attack pressed!")
+	var unit = gameboard.get_last_moved_unit()
+	print(unit)
 
-
-
-func _on_Unit_walk_finished() -> void:
-	self.visible = true

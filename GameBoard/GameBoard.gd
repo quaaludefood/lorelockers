@@ -124,7 +124,8 @@ func _move_active_unit(new_cell: Vector2) -> void:
 func _select_unit(cell: Vector2) -> void:
 	if not _units.has(cell):
 		return	
-
+		
+	_last_moved_unit = _units[cell]
 	_active_unit = _units[cell]
 	_active_unit.is_selected = true
 	_walkable_cells = get_walkable_cells(_active_unit)
@@ -157,3 +158,8 @@ func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 func _on_Cursor_moved(new_cell: Vector2) -> void:
 	if _active_unit and _active_unit.is_selected:
 		_unit_path.draw(_active_unit.cell, new_cell)
+
+func get_last_moved_unit() -> Unit:
+	return _last_moved_unit
+		
+	
