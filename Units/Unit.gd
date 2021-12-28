@@ -60,11 +60,9 @@ func set_is_selected(value: bool) -> void:
 
 func set_can_move(value: bool) -> void:
 	can_move = value
-	print(self.get_name(), "- can move is: ", self.can_move)
 	
 func set_can_attack(value: bool) -> void:
 	can_attack = value
-	print(self.get_name(), "- can attack is: ", self.can_attack)
 
 
 func set_skin(value: Texture) -> void:

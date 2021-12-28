@@ -9,10 +9,20 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "TileMap",
+"class": "Attack1Path",
+"language": "GDScript",
+"path": "res://GameBoard/Attack/Attack1Path.gd"
+}, {
 "base": "Button",
 "class": "AttackButton",
 "language": "GDScript",
 "path": "res://UserInterface/AttackButton.gd"
+}, {
+"base": "TileMap",
+"class": "AttackOverlay",
+"language": "GDScript",
+"path": "res://UnitOverlay/AttackOverlay.gd"
 }, {
 "base": "Node",
 "class": "CombatAction",
@@ -65,7 +75,9 @@ _global_script_classes=[ {
 "path": "res://GameBoard/UnitPath.gd"
 } ]
 _global_script_class_icons={
+"Attack1Path": "",
 "AttackButton": "",
+"AttackOverlay": "",
 "CombatAction": "",
 "Cursor": "",
 "EndTurnButton": "",

@@ -15,15 +15,20 @@ var _active_unit: Unit
 var _last_moved_unit: Unit
 var _active_unit_starting_position :=  Vector2.ZERO
 var _walkable_cells := []
+var _attack_mode:= false
 
 onready var _unit_overlay: UnitOverlay = $UnitOverlay
+onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _unit_path: UnitPath = $UnitPath
+onready var _attack1_path: Attack1Path = $Attack1Path
 onready var _undobutton: Button = get_node("../../UserInterface/UndoButton")
+onready var _attackbutton: Button = get_node("../../UserInterface/AttackButton")
 
 
 func _ready() -> void:
 	_reinitialize()
 	_undobutton.connect("undo_pressed", self, "undo_move")
+	_attackbutton.connect("attack_pressed", self, "scope_attack")
 
 func undo_move()-> void:
 	
@@ -32,6 +37,14 @@ func undo_move()-> void:
 	_last_moved_unit.cell = grid.calculate_grid_coordinates(_active_unit_starting_position)
 	_last_moved_unit.set_can_move(true)
 	_units[_last_moved_unit.cell] = _last_moved_unit
+
+func scope_attack()-> void:
+	_attack_mode = true
+	var _max_range: int = 4
+	var _range := []
+	_range = _flood_fill(_last_moved_unit.cell, _max_range) 
+	_attack_overlay.draw(_range)
+	_attack1_path.initialize(_range)
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if _active_unit and event.is_action_pressed("ui_cancel"):
@@ -54,7 +67,6 @@ func is_occupied(cell: Vector2) -> bool:
 ## Returns an array of cells a given unit can walk using the flood fill algorithm.
 func get_walkable_cells(unit: Unit) -> Array:
 	var array := []
-	print(" get_walkable_cells - unit can move" , unit.can_move)
 	if unit.can_move:
 		array = _flood_fill(unit.cell, unit.move_range)
 	else: 
@@ -156,7 +168,9 @@ func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 
 ## Updates the interactive path's drawing if there's an active and selected unit.
 func _on_Cursor_moved(new_cell: Vector2) -> void:
-	if _active_unit and _active_unit.is_selected:
+	if _attack_mode == true:
+		_attack1_path.draw(_last_moved_unit.cell, new_cell)
+	elif _active_unit and _active_unit.is_selected:
 		_unit_path.draw(_active_unit.cell, new_cell)
 
 func get_last_moved_unit() -> Unit:
