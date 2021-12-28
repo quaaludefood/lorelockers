@@ -20,7 +20,7 @@ var _attack_mode:= false
 onready var _unit_overlay: UnitOverlay = $UnitOverlay
 onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _unit_path: UnitPath = $UnitPath
-onready var _attack1_path: Attack1Path = $Attack1Path
+onready var _attack_path: AttackPath = $AttackPath
 onready var _undobutton: Button = get_node("../../UserInterface/UndoButton")
 onready var _attackbutton: Button = get_node("../../UserInterface/AttackButton")
 
@@ -42,9 +42,14 @@ func scope_attack()-> void:
 	_attack_mode = true
 	var _max_range: int = 4
 	var _range := []
+	var _enemy_unit_cells := []
+	var _friendly_unit_cells := []
 	_range = _flood_fill(_last_moved_unit.cell, _max_range) 
 	_attack_overlay.draw(_range)
-	_attack1_path.initialize(_range)
+	for unit in _units:
+		_enemy_unit_cells.append(unit)
+	
+	_attack_path.initialize(_range, _enemy_unit_cells, _friendly_unit_cells, _last_moved_unit.cell)
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if _active_unit and event.is_action_pressed("ui_cancel"):
@@ -107,7 +112,8 @@ func _flood_fill(cell: Vector2, max_distance: int) -> Array:
 		for direction in DIRECTIONS:
 			var coordinates: Vector2 = current + direction
 			if is_occupied(coordinates):
-				continue
+				if _attack_mode == false:
+					continue
 			if coordinates in array:
 				continue
 
@@ -169,7 +175,7 @@ func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 ## Updates the interactive path's drawing if there's an active and selected unit.
 func _on_Cursor_moved(new_cell: Vector2) -> void:
 	if _attack_mode == true:
-		_attack1_path.draw(_last_moved_unit.cell, new_cell)
+		_attack_path.draw(_last_moved_unit.cell, new_cell)
 	elif _active_unit and _active_unit.is_selected:
 		_unit_path.draw(_active_unit.cell, new_cell)
 
