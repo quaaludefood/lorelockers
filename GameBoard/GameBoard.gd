@@ -29,14 +29,21 @@ func _ready() -> void:
 	_reinitialize()
 	_undobutton.connect("undo_pressed", self, "undo_move")
 	_attackbutton.connect("attack_pressed", self, "scope_attack")
+	_undobutton.disabled = true
+	_attackbutton.disabled = true
 
-func undo_move()-> void:
-	
+func undo_move()-> void:	
 	_units.erase(_last_moved_unit.cell)
 	_last_moved_unit.position = _active_unit_starting_position
 	_last_moved_unit.cell = grid.calculate_grid_coordinates(_active_unit_starting_position)
 	_last_moved_unit.set_can_move(true)
 	_units[_last_moved_unit.cell] = _last_moved_unit
+	_attack_overlay.clear()
+	_attack_path.clear()
+	_attack_mode = false
+	_undobutton.disabled = true
+
+	
 
 func scope_attack()-> void:
 	_attack_mode = true
@@ -48,7 +55,6 @@ func scope_attack()-> void:
 	_attack_overlay.draw(_range)
 	for unit in _units:
 		_enemy_unit_cells.append(unit)
-	
 	_attack_path.initialize(_range, _enemy_unit_cells, _friendly_unit_cells, _last_moved_unit.cell)
 	
 func _unhandled_input(event: InputEvent) -> void:
@@ -125,8 +131,6 @@ func _flood_fill(cell: Vector2, max_distance: int) -> Array:
 func _move_active_unit(new_cell: Vector2) -> void:
 	if is_occupied(new_cell) or not new_cell in _walkable_cells:
 		return
-	# warning-ignore:return_value_discarded
-	
 	_active_unit_starting_position = grid.calculate_map_position(_active_unit.cell)
 	_last_moved_unit = _active_unit
 	_units.erase(_active_unit.cell)
@@ -135,21 +139,31 @@ func _move_active_unit(new_cell: Vector2) -> void:
 	_active_unit.walk_along(_unit_path.current_path)
 	yield(_active_unit, "walk_finished")	
 	_clear_active_unit()
-
+	_undobutton.disabled = false
 
 ## Selects the unit in the `cell` if there's one there.
 ## Sets it as the `_active_unit` and draws its walkable cells and interactive move path. 
 func _select_unit(cell: Vector2) -> void:
 	if not _units.has(cell):
 		return	
-		
+	if  _units[cell].deactivated == true:
+		return
+	if _attack_mode == true:
+		_attack_path.target_selected = true 
+		return
 	_last_moved_unit = _units[cell]
 	_active_unit = _units[cell]
 	_active_unit.is_selected = true
-	_walkable_cells = get_walkable_cells(_active_unit)
-	_unit_overlay.draw(_walkable_cells)
-	_unit_path.initialize(_walkable_cells)
-
+	
+	if _active_unit.can_move:
+		_walkable_cells = get_walkable_cells(_active_unit)
+		_unit_overlay.draw(_walkable_cells)
+		_unit_path.initialize(_walkable_cells)
+		_undobutton.disabled = true
+		_attackbutton.disabled = false
+		
+	else:
+		scope_attack()
 
 ## Deselects the active unit, clearing the cells overlay and interactive path drawing.
 func _deselect_active_unit() -> void:
@@ -166,10 +180,19 @@ func _clear_active_unit() -> void:
 
 ## Selects or moves a unit based on where the cursor is.
 func _on_Cursor_accept_pressed(cell: Vector2) -> void:
-	if not _active_unit:
-		_select_unit(cell)
-	elif _active_unit.is_selected:
-		_move_active_unit(cell)
+	if _attack_path.target_selected == true && _attack_mode == true:		
+		_last_moved_unit.set_deactivated(true)
+		_attack_overlay.clear()
+		_attack_path.stop()
+		_attack_mode = false
+		_undobutton.disabled = true
+		_attackbutton.disabled = true
+		_unit_path.initialize([])
+	else:
+		if not _active_unit:
+			_select_unit(cell)
+		elif _active_unit.is_selected:
+			_move_active_unit(cell)
 
 
 ## Updates the interactive path's drawing if there's an active and selected unit.

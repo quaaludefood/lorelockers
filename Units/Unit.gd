@@ -20,6 +20,7 @@ var is_selected := false setget set_is_selected
 var _is_walking := false setget _set_is_walking
 var can_attack := true setget set_can_attack
 var can_move := true setget set_can_move
+var deactivated := false setget set_deactivated
 
 export var is_friendly := true 
 
@@ -64,7 +65,13 @@ func set_can_move(value: bool) -> void:
 func set_can_attack(value: bool) -> void:
 	can_attack = value
 
-
+func set_deactivated(value: bool) -> void:
+	deactivated = value
+	if value == true:
+		_anim_player.play("Deactivate")
+		set_can_move(false)
+		set_can_attack(false)
+	
 func set_skin(value: Texture) -> void:
 	skin = value
 	if not _sprite:
