@@ -9,6 +9,26 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Reference",
+"class": "Action",
+"language": "GDScript",
+"path": "res://Units/Actions/Action.gd"
+}, {
+"base": "Resource",
+"class": "ActionData",
+"language": "GDScript",
+"path": "res://Units/Actions/ActionData.gd"
+}, {
+"base": "Action",
+"class": "AttackAction",
+"language": "GDScript",
+"path": "res://Units/Actions/Attacks/AttackAction.gd"
+}, {
+"base": "ActionData",
+"class": "AttackActionData",
+"language": "GDScript",
+"path": "res://Units/Actions/Attacks/AttackActionData.gd"
+}, {
 "base": "Button",
 "class": "AttackButton",
 "language": "GDScript",
@@ -39,6 +59,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://UserInterface/EndTurnButton.gd"
 }, {
+"base": "Reference",
+"class": "Formulas",
+"language": "GDScript",
+"path": "res://Units/Formulas.gd"
+}, {
 "base": "Node2D",
 "class": "GameBoard",
 "language": "GDScript",
@@ -48,6 +73,11 @@ _global_script_classes=[ {
 "class": "Grid",
 "language": "GDScript",
 "path": "res://GameBoard/Grid.gd"
+}, {
+"base": "Reference",
+"class": "Hit",
+"language": "GDScript",
+"path": "res://Units/Actions/Hit.gd"
 }, {
 "base": "Reference",
 "class": "PathFinder",
@@ -73,21 +103,33 @@ _global_script_classes=[ {
 "class": "UnitPath",
 "language": "GDScript",
 "path": "res://GameBoard/UnitPath.gd"
+}, {
+"base": "Resource",
+"class": "UnitStats",
+"language": "GDScript",
+"path": "res://Units/Stats/UnitStats.gd"
 } ]
 _global_script_class_icons={
+"Action": "",
+"ActionData": "",
+"AttackAction": "",
+"AttackActionData": "",
 "AttackButton": "",
 "AttackOverlay": "",
 "AttackPath": "",
 "CombatAction": "",
 "Cursor": "",
 "EndTurnButton": "",
+"Formulas": "",
 "GameBoard": "",
 "Grid": "",
+"Hit": "",
 "PathFinder": "",
 "UndoButton": "",
 "Unit": "",
 "UnitOverlay": "",
-"UnitPath": ""
+"UnitPath": "",
+"UnitStats": ""
 }
 
 [application]

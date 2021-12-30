@@ -1,6 +1,4 @@
-## Represents and manages the game board. Stores references to entities that are in each cell and
-## tells whether cells are occupied or not.
-## Units can only move around the grid one at a time.
+
 class_name GameBoard
 extends Node2D
 
@@ -16,6 +14,7 @@ var _last_moved_unit: Unit
 var _active_unit_starting_position :=  Vector2.ZERO
 var _walkable_cells := []
 var _attack_mode:= false
+var _target_unit: Unit
 
 onready var _unit_overlay: UnitOverlay = $UnitOverlay
 onready var _attack_overlay: AttackOverlay = $AttackOverlay
@@ -149,7 +148,8 @@ func _select_unit(cell: Vector2) -> void:
 	if  _units[cell].deactivated == true:
 		return
 	if _attack_mode == true:
-		_attack_path.target_selected = true 
+		_attack_path.target_selected = true
+		_target_unit = _units[cell] 
 		return
 	_last_moved_unit = _units[cell]
 	_active_unit = _units[cell]
@@ -180,7 +180,7 @@ func _clear_active_unit() -> void:
 
 ## Selects or moves a unit based on where the cursor is.
 func _on_Cursor_accept_pressed(cell: Vector2) -> void:
-	if _attack_path.target_selected == true && _attack_mode == true:		
+	if _attack_path.target_selected == true && _attack_mode == true:	
 		_last_moved_unit.set_deactivated(true)
 		_attack_overlay.clear()
 		_attack_path.stop()
@@ -188,6 +188,7 @@ func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 		_undobutton.disabled = true
 		_attackbutton.disabled = true
 		_unit_path.initialize([])
+		_play_attack()
 	else:
 		if not _active_unit:
 			_select_unit(cell)
@@ -205,4 +206,21 @@ func _on_Cursor_moved(new_cell: Vector2) -> void:
 func get_last_moved_unit() -> Unit:
 	return _last_moved_unit
 		
+func _play_attack() -> void:
+	var action_data: ActionData
+	var _targets = []
+	print("target unit: ", _target_unit)
+	_targets.append(_target_unit)
+	var action = AttackAction.new(action_data, _last_moved_unit, _targets)
+	_last_moved_unit.act(action)
+	yield(_active_unit, "action_finished")
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	

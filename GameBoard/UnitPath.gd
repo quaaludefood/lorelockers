@@ -11,7 +11,6 @@ var current_path := PoolVector2Array()
 ## Creates a new PathFinder that uses the AStar algorithm to find a path between two cells among
 ## the `walkable_cells`.
 func initialize(walkable_cells: Array) -> void:
-	print("walkable_cells", walkable_cells)
 	_pathfinder = PathFinder.new(grid, walkable_cells)
 
 

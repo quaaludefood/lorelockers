@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Units/Unit.gd" type="Script" id=1]
 [ext_resource path="res://GameBoard/Grid.tres" type="Resource" id=2]
 [ext_resource path="res://Units/unit_shadow.svg" type="Texture" id=3]
+[ext_resource path="res://Resources/umberto.tres" type="DynamicFont" id=4]
 
 [sub_resource type="Animation" id=3]
 resource_name = "Deactivate"
@@ -83,6 +84,17 @@ texture = ExtResource( 3 )
 position = Vector2( 2, 0 )
 scale = Vector2( 0.24, 0.24 )
 offset = Vector2( -3.8147e-06, -185 )
+
+[node name="HealthDisplay" type="Label" parent="PathFollow2D"]
+margin_left = 27.0
+margin_top = -100.0
+margin_right = 67.0
+margin_bottom = -86.0
+rect_scale = Vector2( 1, 1.4 )
+custom_fonts/font = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "idle"
