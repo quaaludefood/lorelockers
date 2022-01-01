@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://GameBoard/Cursor/Cursor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Units/Unit.tscn" type="PackedScene" id=2]
@@ -14,9 +14,8 @@
 [ext_resource path="res://CombatAction/CombatAction.tscn" type="PackedScene" id=12]
 [ext_resource path="res://UnitOverlay/AttackOverlay.tscn" type="PackedScene" id=13]
 [ext_resource path="res://GameBoard/Attack/AttackPath.tscn" type="PackedScene" id=14]
-[ext_resource path="res://Units/Stats/bear_stats.tres" type="Resource" id=15]
-[ext_resource path="res://Units/Stats/cat_stats.tres" type="Resource" id=16]
-[ext_resource path="res://Units/Stats/squirrel_stats.tres" type="Resource" id=17]
+[ext_resource path="res://Units/Stats/UnitStats.gd" type="Script" id=15]
+[ext_resource path="res://Units/Actions/Attacks/basic_attack.tres" type="Resource" id=16]
 
 [sub_resource type="Curve2D" id=3]
 resource_local_to_scene = true
@@ -24,17 +23,44 @@ _data = {
 "points": PoolVector2Array(  )
 }
 
+[sub_resource type="Resource" id=4]
+script = ExtResource( 15 )
+max_health = 100.0
+base_attack = 10.0
+base_defense = 10.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
 [sub_resource type="Curve2D" id=2]
 resource_local_to_scene = true
 _data = {
 "points": PoolVector2Array(  )
 }
 
+[sub_resource type="Resource" id=5]
+script = ExtResource( 15 )
+max_health = 100.0
+base_attack = 10.0
+base_defense = 10.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
 [sub_resource type="Curve2D" id=1]
 resource_local_to_scene = true
 _data = {
 "points": PoolVector2Array(  )
 }
+
+[sub_resource type="Resource" id=6]
+script = ExtResource( 15 )
+max_health = 100.0
+base_attack = 10.0
+base_defense = 10.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
 
 [node name="Main" type="Node2D"]
 
@@ -62,27 +88,30 @@ light_mask = 0
 [node name="Squirrel" parent="UserInterface/GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 355.298, 298.556 )
 curve = SubResource( 3 )
+actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 7 )
 move_range = 5
 skin_offset = Vector2( 6, 17 )
-stats = ExtResource( 17 )
+stats = SubResource( 4 )
 
 [node name="Cat" parent="UserInterface/GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 850.293, 412.465 )
 curve = SubResource( 2 )
+actions = [ ExtResource( 16 ) ]
 is_friendly = false
 skin = ExtResource( 9 )
 move_range = 8
 skin_offset = Vector2( 5, 12 )
-stats = ExtResource( 16 )
+stats = SubResource( 5 )
 
 [node name="Bear" parent="UserInterface/GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 600, 480 )
 curve = SubResource( 1 )
+actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 8 )
 move_range = 3
 skin_offset = Vector2( 2, 9 )
-stats = ExtResource( 15 )
+stats = SubResource( 6 )
 
 [node name="CombatAction" parent="UserInterface/GameBoard" instance=ExtResource( 12 )]
 

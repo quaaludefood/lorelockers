@@ -1,4 +1,4 @@
-
+#Is a command
 class_name Action
 extends Reference
 
@@ -15,14 +15,16 @@ func _init(data: ActionData, actor, targets: Array) -> void:
 	_actor = actor
 	_targets = targets
 
-
-# Applies the action on `_targets` using `_actor`'s stats.
+# Applies the action on the targets, using the actor's stats.
+# Returns `true` if the action succeeded.
 func apply_async() -> bool:
 	return _apply_async()
 
-func _apply_async() -> bool:
-	emit_signal("finished")
-	return true
 
-func targets_opponents() -> bool:
+# Notice that the function's name includes the suffix "async".
+# This indicates the function should be a coroutine. That's because in our case,
+# finishing an action involves animation.
+func _apply_async() -> bool:
+	# In the abstract base Action class, we don't do anything!
+	emit_signal("finished")
 	return true

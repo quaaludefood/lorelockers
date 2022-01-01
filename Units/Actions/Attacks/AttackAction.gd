@@ -1,5 +1,6 @@
 # Concrete class for basic damaging attacks. Inflicts direct damage to one or more targets.
 class_name AttackAction
+#Action is the abstract class. Overrides the Action.apply_async class
 extends Action
 
 var _hits := []
@@ -8,32 +9,24 @@ var _hits := []
 func _init(data: AttackActionData, actor, targets: Array).(data, actor, targets) -> void:
 	pass
 
-
-# Plays the acting battler's attack animation once for each target. Damages each target when the actor's animation emits the `triggered` signal.
-func _apply_async() -> bool:
-	for target in _targets:	
-	
-		var hit_chance := Formulas.calculate_hit_chance(_data, _actor, target)
-		var damage := calculate_hit_damage(target)
-		var hit := Hit.new(damage, hit_chance)
-	return true
-
-
-func _on_BattlerAnim_triggered(target, hit: Hit) -> void:
-	target.take_hit(hit)
-
-
-func calculate_hit_damage(target) -> int:
+# Returns the damage dealt by this action. We will update this function
+# when we implement status effects.
+func calculate_potential_damage_for(target) -> int:
 	return Formulas.calculate_base_damage(_data, _actor, target)
 
 
-func get_damage_multiplier() -> float:
-	return _data.damage_multiplier
-
-
-func get_element() -> int:
-	return _data.element
-
-
-func get_hit_chance() -> int:
-	return _data.hit_chance
+func _apply_async() -> bool:
+	# We apply the action to each target so attacks work both for single and multiple targets.
+	for target in _targets:
+		var hit_chance := Formulas.calculate_hit_chance(_data, _actor, target)
+		var damage := calculate_potential_damage_for(target)
+		var hit := Hit.new(damage, hit_chance)
+		# We're going to define a new function on the battler so it takes hits.
+		target.take_hit(hit)
+	# Our method is supposed to be a coroutine, that is to say, it pauses
+	# execution and ends after some time.
+	# in Godot 3.2, we do so using the `yield` keyword.
+	# Here, we wait for the next frame by listening to the SceneTree's 
+	# `idle_frame` signal.
+	yield(Engine.get_main_loop(), "idle_frame")
+	return true

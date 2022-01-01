@@ -11,6 +11,7 @@ signal action_finished
 signal damage_taken(amount)
 signal hit_missed
 
+export var actions: Array
 export var is_friendly := true 
 export var grid: Resource
 export var skin: Texture setget set_skin
@@ -49,6 +50,8 @@ func _get_configuration_warning() -> String:
 	var warning := ""
 	if not stats:
 		warning = "You need a UnitStats resource for this node to work."
+	if not actions:
+		warning = "You need an [Attack].tres resource for this node to work."
 	return warning
 
 func _process(delta: float) -> void:
@@ -63,8 +66,8 @@ func _process(delta: float) -> void:
 		self.set_can_move(false)
 		
 func act(action) -> void:
-	print("action: ", action)
-	yield(action.apply_async(), "finished")
+
+	yield(action.apply_async(), "completed")
 	emit_signal("action_finished")
 
 
@@ -80,6 +83,7 @@ func take_hit(hit: Hit) -> void:
 func _take_damage(amount: int) -> void:
 	stats.health -= amount
 	_health_display.text = str(stats.health)
+	print("%s took %s damage. Health is now %s." % [name, amount, stats.health])
 
 
 func set_cell(value: Vector2) -> void:

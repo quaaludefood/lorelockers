@@ -149,7 +149,6 @@ func _select_unit(cell: Vector2) -> void:
 		return
 	if _attack_mode == true:
 		_attack_path.target_selected = true
-		_target_unit = _units[cell] 
 		return
 	_last_moved_unit = _units[cell]
 	_active_unit = _units[cell]
@@ -180,15 +179,11 @@ func _clear_active_unit() -> void:
 
 ## Selects or moves a unit based on where the cursor is.
 func _on_Cursor_accept_pressed(cell: Vector2) -> void:
-	if _attack_path.target_selected == true && _attack_mode == true:	
-		_last_moved_unit.set_deactivated(true)
-		_attack_overlay.clear()
-		_attack_path.stop()
-		_attack_mode = false
-		_undobutton.disabled = true
-		_attackbutton.disabled = true
-		_unit_path.initialize([])
+	if _attack_path.target_selected == true && _attack_mode == true:
+		_target_unit = _units[cell]
+		print("_target_unit", _target_unit)
 		_play_attack()
+		_clear_attack_scoping()
 	else:
 		if not _active_unit:
 			_select_unit(cell)
@@ -208,16 +203,26 @@ func get_last_moved_unit() -> Unit:
 		
 func _play_attack() -> void:
 	var action_data: ActionData
+	action_data = _last_moved_unit.actions[0]
 	var _targets = []
-	print("target unit: ", _target_unit)
 	_targets.append(_target_unit)
+	print("action_data :", action_data)
+	
+	##convert ActionData to AttackActionData
+	####This is the line that is causing the issues. Somehow action_data is converted to null
 	var action = AttackAction.new(action_data, _last_moved_unit, _targets)
+
 	_last_moved_unit.act(action)
-	yield(_active_unit, "action_finished")
+	yield(_last_moved_unit, "action_finished")
+	_last_moved_unit.set_deactivated(true)
+	_attack_mode = false
 	
-	
-	
-	
+func _clear_attack_scoping() -> void:	
+	_attack_overlay.clear()
+	_attack_path.stop()
+	_undobutton.disabled = true
+	_attackbutton.disabled = true
+	_unit_path.initialize([])
 	
 	
 	
