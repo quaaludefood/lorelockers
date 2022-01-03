@@ -109,6 +109,10 @@ func set_deactivated(value: bool) -> void:
 		_anim_player.play("Deactivate")
 		set_can_move(false)
 		set_can_attack(false)
+	if value == false:
+		_anim_player.play("idle")
+		set_can_move(true)
+		set_can_attack(true)
 	
 func set_skin(value: Texture) -> void:
 	skin = value

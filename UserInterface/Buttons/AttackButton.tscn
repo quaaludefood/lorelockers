@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://UserInterface/Buttons/DefaultButton.tscn" type="PackedScene" id=1]
+[ext_resource path="res://UserInterface/Buttons/AttackButton.gd" type="Script" id=2]
+
+[node name="AttackButton" instance=ExtResource( 1 )]
+text = "ATTACK"
+script = ExtResource( 2 )
+
+[connection signal="button_up" from="." to="." method="_on_AttackButton_button_up"]

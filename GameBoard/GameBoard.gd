@@ -20,27 +20,22 @@ onready var _unit_overlay: UnitOverlay = $UnitOverlay
 onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _unit_path: UnitPath = $UnitPath
 onready var _attack_path: AttackPath = $AttackPath
-onready var _undobutton: Button = get_node("../../UserInterface/UndoButton")
-onready var _attackbutton: Button = get_node("../../UserInterface/AttackButton")
+
+onready var _attackbutton: Button = get_node("../Interface/Buttons/AttackButton")
+onready var _endturnbutton: Button = get_node("../Interface/Buttons/EndTurnButton")
+onready var _undobutton: Button = get_node("../Interface/Buttons/UndoButton")
 
 
 func _ready() -> void:
 	_reinitialize()
-	_undobutton.connect("undo_pressed", self, "undo_move")
 	_attackbutton.connect("attack_pressed", self, "scope_attack")
+	_endturnbutton.connect("endturn_pressed", self, "end_turn")
+	_undobutton.connect("undo_pressed", self, "undo_move")
+
 	_undobutton.disabled = true
 	_attackbutton.disabled = true
 
-func undo_move()-> void:	
-	_units.erase(_last_moved_unit.cell)
-	_last_moved_unit.position = _active_unit_starting_position
-	_last_moved_unit.cell = grid.calculate_grid_coordinates(_active_unit_starting_position)
-	_last_moved_unit.set_can_move(true)
-	_units[_last_moved_unit.cell] = _last_moved_unit
-	_attack_overlay.clear()
-	_attack_path.clear()
-	_attack_mode = false
-	_undobutton.disabled = true
+
 
 	
 
@@ -55,6 +50,25 @@ func scope_attack()-> void:
 	for unit in _units:
 		_enemy_unit_cells.append(unit)
 	_attack_path.initialize(_range, _enemy_unit_cells, _friendly_unit_cells, _last_moved_unit.cell)
+	
+func end_turn()-> void:	
+	_clear_attack_scoping()
+	_clear_active_unit()
+	for unit in _units.values():
+		unit.set_deactivated(false)
+		print(unit.name)
+		print(unit.can_move)
+	
+func undo_move()-> void:	
+	_units.erase(_last_moved_unit.cell)
+	_last_moved_unit.position = _active_unit_starting_position
+	_last_moved_unit.cell = grid.calculate_grid_coordinates(_active_unit_starting_position)
+	_last_moved_unit.set_can_move(true)
+	_units[_last_moved_unit.cell] = _last_moved_unit
+	_attack_overlay.clear()
+	_attack_path.clear()
+	_attack_mode = false
+	_undobutton.disabled = true
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if _active_unit and event.is_action_pressed("ui_cancel"):
