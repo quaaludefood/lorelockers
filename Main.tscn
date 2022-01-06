@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://GameBoard/Cursor/Cursor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Units/Unit.tscn" type="PackedScene" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://Units/bugcat.png" type="Texture" id=9]
 [ext_resource path="res://Background/Map.tscn" type="PackedScene" id=10]
 [ext_resource path="res://UserInterface/Interface.tscn" type="PackedScene" id=11]
+[ext_resource path="res://WorldCamera.gd" type="Script" id=12]
 [ext_resource path="res://UnitOverlay/AttackOverlay.tscn" type="PackedScene" id=13]
 [ext_resource path="res://GameBoard/Attack/AttackPath.tscn" type="PackedScene" id=14]
 [ext_resource path="res://Units/Stats/UnitStats.gd" type="Script" id=15]
@@ -111,6 +112,11 @@ skin_offset = Vector2( 2, 9 )
 stats = SubResource( 6 )
 
 [node name="Interface" parent="." instance=ExtResource( 11 )]
+
+[node name="WorldCamera" type="Camera2D" parent="."]
+anchor_mode = 0
+current = true
+script = ExtResource( 12 )
 
 [connection signal="accept_pressed" from="GameBoard/Cursor" to="GameBoard" method="_on_Cursor_accept_pressed"]
 [connection signal="moved" from="GameBoard/Cursor" to="GameBoard" method="_on_Cursor_moved"]

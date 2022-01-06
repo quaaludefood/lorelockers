@@ -18,17 +18,20 @@ export var ui_cooldown := 0.1
 var cell := Vector2.ZERO setget set_cell
 
 onready var _timer: Timer = $Timer
+onready var _main: Node = get_node("../../../Main")
 
 
 func _ready() -> void:
 	_timer.wait_time = ui_cooldown
 	position = grid.calculate_map_position(cell)
-
+	print(_main)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Navigating cells with the mouse.
 	if event is InputEventMouseMotion:
-		self.cell = grid.calculate_grid_coordinates(event.position)
+		#Old code
+		#self.cell = grid.calculate_grid_coordinates(event.position)
+		self.cell = grid.calculate_grid_coordinates(_main.get_global_mouse_position())
 	# Trying to select something in a cell.
 	elif event.is_action_pressed("click") or event.is_action_pressed("ui_accept"):
 		emit_signal("accept_pressed", cell)
@@ -40,16 +43,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if not should_move:
 		return
-
-	# Moves the cursor by one grid cell.
-	if event.is_action("ui_right"):
-		self.cell += Vector2.RIGHT
-	elif event.is_action("ui_up"):
-		self.cell += Vector2.UP
-	elif event.is_action("ui_left"):
-		self.cell += Vector2.LEFT
-	elif event.is_action("ui_down"):
-		self.cell += Vector2.DOWN
 
 
 func _draw() -> void:
