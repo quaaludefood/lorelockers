@@ -83,7 +83,6 @@ func take_hit(hit: Hit) -> void:
 func _take_damage(amount: int) -> void:
 	stats.health -= amount
 	_health_display.text = str(stats.health)
-	print("%s took %s damage. Health is now %s." % [name, amount, stats.health])
 
 
 func set_cell(value: Vector2) -> void:
@@ -104,11 +103,15 @@ func set_can_attack(value: bool) -> void:
 	can_attack = value
 
 func set_deactivated(value: bool) -> void:
+	print(self.name, "set_deactivated:",value)
 	deactivated = value
 	if value == true:
+		print("play deactivate")
 		_anim_player.play("Deactivate")
+		print(_anim_player)
 		set_can_move(false)
 		set_can_attack(false)
+		set_is_selected(false)
 	if value == false:
 		_anim_player.play("idle")
 		set_can_move(true)
@@ -137,7 +140,10 @@ func _set_is_walking(value: bool) -> void:
 func walk_along(path: PoolVector2Array) -> void:
 	if path.empty():
 		return
-
+	if path[0].x > path[-1].x:
+		_sprite.set_flip_h( true )
+	else:
+		_sprite.set_flip_h( false )
 	curve.add_point(Vector2.ZERO)
 	for point in path:
 		curve.add_point(grid.calculate_map_position(point) - position)
@@ -146,6 +152,3 @@ func walk_along(path: PoolVector2Array) -> void:
 
 func _on_BattlerStats_health_depleted() -> void:
 	set_deactivated(true)
-
-
-

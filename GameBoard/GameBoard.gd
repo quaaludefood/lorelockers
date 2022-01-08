@@ -21,9 +21,9 @@ onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _unit_path: UnitPath = $UnitPath
 onready var _attack_path: AttackPath = $AttackPath
 
-onready var _attackbutton: Button = get_node("../Interface/Buttons/AttackButton")
-onready var _endturnbutton: Button = get_node("../Interface/Buttons/EndTurnButton")
-onready var _undobutton: Button = get_node("../Interface/Buttons/UndoButton")
+onready var _attackbutton: Button = get_node("../UI/Interface/Buttons/AttackButton")
+onready var _endturnbutton: Button = get_node("../UI/Interface/Buttons/EndTurnButton")
+onready var _undobutton: Button = get_node("../UI/Interface/Buttons/UndoButton")
 
 
 func _ready() -> void:
@@ -35,9 +35,6 @@ func _ready() -> void:
 	_undobutton.disabled = true
 	_attackbutton.disabled = true
 
-
-
-	
 
 func scope_attack()-> void:
 	_attack_mode = true
@@ -56,8 +53,6 @@ func end_turn()-> void:
 	_clear_active_unit()
 	for unit in _units.values():
 		unit.set_deactivated(false)
-		print(unit.name)
-		print(unit.can_move)
 	
 func undo_move()-> void:	
 	_units.erase(_last_moved_unit.cell)
@@ -71,6 +66,13 @@ func undo_move()-> void:
 	_undobutton.disabled = true
 	
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_released("debug_info"):
+		print("hi!")
+		for unit in _units.values():
+			print(unit.name, ": can move:", unit.can_move, " can attack:", unit.can_attack,
+			  " is selected:", unit.is_selected, " deactivated:", unit.deactivated, 
+			" is friendly:", unit.is_friendly)
+	
 	if _active_unit and event.is_action_pressed("ui_cancel"):
 		_deselect_active_unit()
 		_clear_active_unit()
@@ -219,17 +221,14 @@ func _play_attack() -> void:
 	var action_data: ActionData
 	action_data = _last_moved_unit.actions[0]
 	var _targets = []
-	_targets.append(_target_unit)
-	print("action_data :", action_data)
-	
-	##convert ActionData to AttackActionData
-	####This is the line that is causing the issues. Somehow action_data is converted to null
+	_targets.append(_target_unit)	
 	var action = AttackAction.new(action_data, _last_moved_unit, _targets)
 
 	_last_moved_unit.act(action)
 	yield(_last_moved_unit, "action_finished")
 	_last_moved_unit.set_deactivated(true)
 	_attack_mode = false
+	_reinitialize()
 	
 func _clear_attack_scoping() -> void:	
 	_attack_overlay.clear()

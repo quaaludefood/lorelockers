@@ -111,12 +111,18 @@ move_range = 3
 skin_offset = Vector2( 2, 9 )
 stats = SubResource( 6 )
 
-[node name="Interface" parent="." instance=ExtResource( 11 )]
-
 [node name="WorldCamera" type="Camera2D" parent="."]
 anchor_mode = 0
 current = true
+limit_left = 0
+limit_top = 0
+limit_right = 1500
+limit_bottom = 1500
 script = ExtResource( 12 )
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Interface" parent="UI" instance=ExtResource( 11 )]
 
 [connection signal="accept_pressed" from="GameBoard/Cursor" to="GameBoard" method="_on_Cursor_accept_pressed"]
 [connection signal="moved" from="GameBoard/Cursor" to="GameBoard" method="_on_Cursor_moved"]
