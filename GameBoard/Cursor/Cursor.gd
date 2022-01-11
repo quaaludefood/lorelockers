@@ -24,16 +24,13 @@ onready var _main: Node = get_node("../../../Main")
 func _ready() -> void:
 	_timer.wait_time = ui_cooldown
 	position = grid.calculate_map_position(cell)
-	print(_main)
+	
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Navigating cells with the mouse.
 	if event is InputEventMouseMotion:
-		#Old code
-		#self.cell = grid.calculate_grid_coordinates(event.position)
 		self.cell = grid.calculate_grid_coordinates(_main.get_global_mouse_position())
-	# Trying to select something in a cell.
-	elif event.is_action_pressed("click") or event.is_action_pressed("ui_accept"):
+	elif event.is_action_pressed("click"):
 		emit_signal("accept_pressed", cell)
 		get_tree().set_input_as_handled()
 

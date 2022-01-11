@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=26 format=2]
 
 [ext_resource path="res://GameBoard/Cursor/Cursor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Units/Unit.tscn" type="PackedScene" id=2]
@@ -16,6 +16,7 @@
 [ext_resource path="res://GameBoard/Attack/AttackPath.tscn" type="PackedScene" id=14]
 [ext_resource path="res://Units/Stats/UnitStats.gd" type="Script" id=15]
 [ext_resource path="res://Units/Actions/Attacks/basic_attack.tres" type="Resource" id=16]
+[ext_resource path="res://Units/AI/AggressiveUnitAI.tscn" type="PackedScene" id=17]
 
 [sub_resource type="Curve2D" id=3]
 resource_local_to_scene = true
@@ -47,13 +48,31 @@ base_speed = 70.0
 base_hit_chance = 100.0
 base_evasion = 0.0
 
+[sub_resource type="Resource" id=6]
+script = ExtResource( 15 )
+max_health = 100.0
+base_attack = 10.0
+base_defense = 10.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
+[sub_resource type="Resource" id=7]
+script = ExtResource( 15 )
+max_health = 100.0
+base_attack = 10.0
+base_defense = 10.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
 [sub_resource type="Curve2D" id=1]
 resource_local_to_scene = true
 _data = {
 "points": PoolVector2Array(  )
 }
 
-[sub_resource type="Resource" id=6]
+[sub_resource type="Resource" id=8]
 script = ExtResource( 15 )
 max_health = 100.0
 base_attack = 10.0
@@ -92,24 +111,44 @@ move_range = 5
 skin_offset = Vector2( 6, 17 )
 stats = SubResource( 4 )
 
-[node name="Cat" parent="GameBoard" instance=ExtResource( 2 )]
+[node name="Cat1" parent="GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 850.293, 412.465 )
 curve = SubResource( 2 )
 actions = [ ExtResource( 16 ) ]
-is_friendly = false
 skin = ExtResource( 9 )
-move_range = 8
+move_range = 4
 skin_offset = Vector2( 5, 12 )
 stats = SubResource( 5 )
+ai_scene = ExtResource( 17 )
+
+[node name="Cat2" parent="GameBoard" instance=ExtResource( 2 )]
+position = Vector2( 750.293, 200 )
+curve = SubResource( 2 )
+actions = [ ExtResource( 16 ) ]
+skin = ExtResource( 9 )
+move_range = 4
+skin_offset = Vector2( 5, 12 )
+stats = SubResource( 6 )
+ai_scene = ExtResource( 17 )
+
+[node name="Cat3" parent="GameBoard" instance=ExtResource( 2 )]
+position = Vector2( 650.293, 412.465 )
+curve = SubResource( 2 )
+actions = [ ExtResource( 16 ) ]
+skin = ExtResource( 9 )
+move_range = 4
+skin_offset = Vector2( 5, 12 )
+stats = SubResource( 7 )
+ai_scene = ExtResource( 17 )
 
 [node name="Bear" parent="GameBoard" instance=ExtResource( 2 )]
-position = Vector2( 600, 480 )
+position = Vector2( 200, 480 )
 curve = SubResource( 1 )
 actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 8 )
 move_range = 3
 skin_offset = Vector2( 2, 9 )
-stats = SubResource( 6 )
+stats = SubResource( 8 )
 
 [node name="WorldCamera" type="Camera2D" parent="."]
 anchor_mode = 0

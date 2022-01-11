@@ -1,6 +1,7 @@
 class_name ActionData
 extends Resource
 
+export var label := "Base combat action"
 # 
 # The following properties help us filter potential targets on a battler's turn.
 export var is_targeting_self := false

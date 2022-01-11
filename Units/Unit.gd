@@ -12,13 +12,13 @@ signal damage_taken(amount)
 signal hit_missed
 
 export var actions: Array
-export var is_friendly := true 
 export var grid: Resource
 export var skin: Texture setget set_skin
 export var move_range := 6
 export var skin_offset := Vector2.ZERO setget set_skin_offset
 export var move_speed := 600.0
 export var stats: Resource
+export var ai_scene: PackedScene
 
 var cell := Vector2.ZERO setget set_cell
 var is_selected := false setget set_is_selected
@@ -26,14 +26,14 @@ var _is_walking := false setget _set_is_walking
 var can_attack := true setget set_can_attack
 var can_move := true setget set_can_move
 var deactivated := false setget set_deactivated
-
-
+var _ai_instance = null
 
 onready var _sprite: Sprite = $PathFollow2D/Sprite
 onready var _health_display: Label = $PathFollow2D/HealthDisplay
 onready var _anim_player: AnimationPlayer = $AnimationPlayer
 onready var _path_follow: PathFollow2D = $PathFollow2D
 
+###Generic functions
 func _ready() -> void:
 	set_process(false)
 	stats = stats.duplicate()
@@ -54,6 +54,15 @@ func _get_configuration_warning() -> String:
 		warning = "You need an [Attack].tres resource for this node to work."
 	return warning
 
+func setup(battlers: Array) -> void:
+	if ai_scene:
+		# We instance the `ai_scene` and store a reference to it.
+		_ai_instance = ai_scene.instance()
+		# `BattlerAI.setup()` takes the actor and all battlers in the encounter.
+		_ai_instance.setup(self, battlers)
+		# Adding the instance as a child to trigger its `_ready()` callback.
+		add_child(_ai_instance)
+		
 func _process(delta: float) -> void:
 	_path_follow.offset += move_speed * delta
 
@@ -64,26 +73,17 @@ func _process(delta: float) -> void:
 		curve.clear_points()
 		emit_signal("walk_finished")
 		self.set_can_move(false)
-		
-func act(action) -> void:
 
-	yield(action.apply_async(), "completed")
-	emit_signal("action_finished")
+###Getters and setters
 
+func is_friendly() -> bool:
+	return ai_scene == null
+	
+func is_fallen() -> bool:
+	return stats.health == 0
 
-# Applies a hit object to the battler, dealing damage or status effects.
-func take_hit(hit: Hit) -> void:
-	if hit.does_hit():
-		_take_damage(hit.damage)
-		emit_signal("damage_taken", hit.damage)
-		
-	else:
-		emit_signal("hit_missed")
-		
-func _take_damage(amount: int) -> void:
-	stats.health -= amount
-	_health_display.text = str(stats.health)
-
+func get_ai() -> Node:
+	return _ai_instance
 
 func set_cell(value: Vector2) -> void:
 	cell = grid.clamp(value)
@@ -103,10 +103,7 @@ func set_can_attack(value: bool) -> void:
 	can_attack = value
 
 func set_deactivated(value: bool) -> void:
-	print(self.name, "set_deactivated:",value)
-	deactivated = value
 	if value == true:
-		print("play deactivate")
 		_anim_player.play("Deactivate")
 		print(_anim_player)
 		set_can_move(false)
@@ -134,8 +131,30 @@ func set_skin_offset(value: Vector2) -> void:
 func _set_is_walking(value: bool) -> void:
 	_is_walking = value
 	set_process(_is_walking)
+	
+###Battle functions
 
-
+func act(action) -> void:
+	yield(action.apply_async(), "completed")
+	emit_signal("action_finished")
+	
+func take_hit(hit: Hit) -> void:
+	if hit.does_hit():
+		_take_damage(hit.damage)
+		emit_signal("damage_taken", hit.damage)
+		
+	else:
+		emit_signal("hit_missed")
+		
+func _take_damage(amount: int) -> void:
+	stats.health -= amount
+	_health_display.text = str(stats.health)
+	
+func _on_BattlerStats_health_depleted() -> void:
+	set_deactivated(true)
+	
+###Movement functions
+		
 	
 func walk_along(path: PoolVector2Array) -> void:
 	if path.empty():
@@ -150,5 +169,4 @@ func walk_along(path: PoolVector2Array) -> void:
 	cell = path[-1]
 	self._is_walking = true
 
-func _on_BattlerStats_health_depleted() -> void:
-	set_deactivated(true)
+

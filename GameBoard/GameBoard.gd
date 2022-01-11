@@ -7,14 +7,16 @@ const DIRECTIONS = [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]
 ## Resource of type Grid.
 export var grid: Resource
 
-## Mapping of coordinates of a cell to a reference to the unit it contains.
 var _units := {}
+var _friendly_units := []
+var _enemy_units := []
 var _active_unit: Unit
 var _last_moved_unit: Unit
 var _active_unit_starting_position :=  Vector2.ZERO
 var _walkable_cells := []
 var _attack_mode:= false
 var _target_unit: Unit
+var _is_player_turn := false
 
 onready var _unit_overlay: UnitOverlay = $UnitOverlay
 onready var _attack_overlay: AttackOverlay = $AttackOverlay
@@ -25,18 +27,150 @@ onready var _attackbutton: Button = get_node("../UI/Interface/Buttons/AttackButt
 onready var _endturnbutton: Button = get_node("../UI/Interface/Buttons/EndTurnButton")
 onready var _undobutton: Button = get_node("../UI/Interface/Buttons/UndoButton")
 
-
+####Generic functions
 func _ready() -> void:
-	_reinitialize()
+	_is_player_turn = true
 	_attackbutton.connect("attack_pressed", self, "scope_attack")
 	_endturnbutton.connect("endturn_pressed", self, "end_turn")
 	_undobutton.connect("undo_pressed", self, "undo_move")
 
 	_undobutton.disabled = true
 	_attackbutton.disabled = true
+	
+	var all_units = []
+	for child in get_children():
+		var unit := child as Unit
+		if not unit:
+			continue
+		all_units.append(unit)
+		if unit.is_friendly():
+			_friendly_units.append(unit)
+		else:
+			_enemy_units.append(unit)
+		
+	for unit in all_units:
+		unit.setup(all_units)
+
+	for unit in _friendly_units:
+		_units[unit.cell] = unit
+	for unit in _enemy_units:
+		_units[unit.cell] = unit
+	
+func _reinitialize() -> void:
+	_units.clear()
+	for unit in _friendly_units:
+		_units[unit.cell] = unit
+	for unit in _enemy_units:
+		_units[unit.cell] = unit
+		
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_released("debug_info"):
+		print("hi!")
+		for unit in _units.values():
+			print(unit.name, ": can move:", unit.can_move, " can attack:", unit.can_attack,
+			  " is selected:", unit.is_selected, " deactivated:", unit.deactivated, 
+			" is friendly:", unit.is_friendly())
+	
+	if _active_unit and event.is_action_pressed("ui_cancel"):
+		_deselect_active_unit()
+		_clear_active_unit()
+		
+###Getters and setters
+
+func _get_configuration_warning() -> String:
+	var warning := ""
+	if not grid:
+		warning = "You need a Grid resource for this node to work."
+	return warning
+
+func is_occupied(cell: Vector2) -> bool:
+	return true if _units.has(cell) else false
+
+func get_last_moved_unit() -> Unit:
+	return _last_moved_unit
+
+func get_walkable_cells(unit: Unit) -> Array:
+	var array := []
+	if unit.can_move:
+		array = _flood_fill(unit.cell, unit.move_range)
+	else: 
+		_deselect_active_unit()
+		_clear_active_unit()	
+	return array
+	
+###Turn functions
+
+func end_turn()-> void:	
+	_clear_attack_scoping()
+	_clear_active_unit()
+	for unit in _units.values():
+		unit.set_deactivated(false)
+	 
+	_is_player_turn = not _is_player_turn
+	if _is_player_turn == false:
+		_play_ai_turn()
+
+func _play_ai_turn() -> void:
+	for unit in _enemy_units:
+		var result: Dictionary = unit.get_ai().choose()
+		var action_data: ActionData
+		var targets := []
+		action_data = result.action
+		targets = result.targets
+		approach_enemy(unit, targets[0])
+		#print("%s attacks %s with action %s" % [unit.name, targets[0].name,  action_data.label])
+
+func approach_enemy(unit: Unit, enemy_unit: Unit) -> Vector2:
+	var move_range = get_walkable_cells(unit)
+	var enemy_location = enemy_unit.cell
+	var distances = {}
+	var result:Vector2
+	for cell in move_range:
+		distances[cell] = cell.distance_to(enemy_location)
+	result = distances[0]
+	for cell in distances.keys():
+		if cell.value < result.distance_to(enemy_location):
+			result = cell
+	print(distances)
+	print(result)
+	return result
+	
+	
+func _select_unit(cell: Vector2) -> void:
+	if not _units.has(cell):
+		return	
+	if  _units[cell].deactivated == true:
+		return
+	if _attack_mode == true:
+		_attack_path.target_selected = true
+		return
+	_last_moved_unit = _units[cell]
+	_active_unit = _units[cell]
+	_active_unit.is_selected = true
+	
+	if _active_unit.can_move:
+		_walkable_cells = get_walkable_cells(_active_unit)
+		_unit_overlay.draw(_walkable_cells)
+		_unit_path.initialize(_walkable_cells)
+		_undobutton.disabled = true
+		_attackbutton.disabled = false
+		
+	else:
+		scope_attack()
+
+func _deselect_active_unit() -> void:
+	_active_unit.is_selected = false
+	_unit_overlay.clear()
+	_unit_path.stop()
 
 
+func _clear_active_unit() -> void:
+	_active_unit = null
+	_walkable_cells.clear()
+
+###Battle functions
 func scope_attack()-> void:
+	
 	_attack_mode = true
 	var _max_range: int = 4
 	var _range := []
@@ -47,12 +181,27 @@ func scope_attack()-> void:
 	for unit in _units:
 		_enemy_unit_cells.append(unit)
 	_attack_path.initialize(_range, _enemy_unit_cells, _friendly_unit_cells, _last_moved_unit.cell)
+
+func _play_attack() -> void:
+	var action_data: ActionData
+	action_data = _last_moved_unit.actions[0]
+	var _targets = []
+	_targets.append(_target_unit)	
+	var action = AttackAction.new(action_data, _last_moved_unit, _targets)
+	_last_moved_unit.act(action)
+	yield(_last_moved_unit, "action_finished")
+	_last_moved_unit.set_deactivated(true)
+	_attack_mode = false
+	_reinitialize()
 	
-func end_turn()-> void:	
-	_clear_attack_scoping()
-	_clear_active_unit()
-	for unit in _units.values():
-		unit.set_deactivated(false)
+func _clear_attack_scoping() -> void:	
+	_attack_overlay.clear()
+	_attack_path.stop()
+	_undobutton.disabled = true
+	_attackbutton.disabled = true
+	_unit_path.initialize([])
+			
+###Movement functions
 	
 func undo_move()-> void:	
 	_units.erase(_last_moved_unit.cell)
@@ -65,55 +214,7 @@ func undo_move()-> void:
 	_attack_mode = false
 	_undobutton.disabled = true
 	
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_released("debug_info"):
-		print("hi!")
-		for unit in _units.values():
-			print(unit.name, ": can move:", unit.can_move, " can attack:", unit.can_attack,
-			  " is selected:", unit.is_selected, " deactivated:", unit.deactivated, 
-			" is friendly:", unit.is_friendly)
-	
-	if _active_unit and event.is_action_pressed("ui_cancel"):
-		_deselect_active_unit()
-		_clear_active_unit()
 
-
-func _get_configuration_warning() -> String:
-	var warning := ""
-	if not grid:
-		warning = "You need a Grid resource for this node to work."
-	return warning
-
-
-## Returns `true` if the cell is occupied by a unit.
-func is_occupied(cell: Vector2) -> bool:
-	return true if _units.has(cell) else false
-
-
-## Returns an array of cells a given unit can walk using the flood fill algorithm.
-func get_walkable_cells(unit: Unit) -> Array:
-	var array := []
-	if unit.can_move:
-		array = _flood_fill(unit.cell, unit.move_range)
-	else: 
-		_deselect_active_unit()
-		_clear_active_unit()
-	
-	return array
-
-
-## Clears, and refills the `_units` dictionary with game objects that are on the board.
-func _reinitialize() -> void:
-	_units.clear()
-
-	for child in get_children():
-		var unit := child as Unit
-		if not unit:
-			continue
-		_units[unit.cell] = unit
-
-
-## Returns an array with all the coordinates of walkable cells based on the `max_distance`.
 func _flood_fill(cell: Vector2, max_distance: int) -> Array:
 	var array := []
 	var stack := [cell]
@@ -142,7 +243,6 @@ func _flood_fill(cell: Vector2, max_distance: int) -> Array:
 	return array
 
 
-## Updates the _units dictionary with the target position for the unit and asks the _active_unit to walk to it.
 func _move_active_unit(new_cell: Vector2) -> void:
 	if is_occupied(new_cell) or not new_cell in _walkable_cells:
 		return
@@ -156,44 +256,8 @@ func _move_active_unit(new_cell: Vector2) -> void:
 	_clear_active_unit()
 	_undobutton.disabled = false
 
-## Selects the unit in the `cell` if there's one there.
-## Sets it as the `_active_unit` and draws its walkable cells and interactive move path. 
-func _select_unit(cell: Vector2) -> void:
-	if not _units.has(cell):
-		return	
-	if  _units[cell].deactivated == true:
-		return
-	if _attack_mode == true:
-		_attack_path.target_selected = true
-		return
-	_last_moved_unit = _units[cell]
-	_active_unit = _units[cell]
-	_active_unit.is_selected = true
-	
-	if _active_unit.can_move:
-		_walkable_cells = get_walkable_cells(_active_unit)
-		_unit_overlay.draw(_walkable_cells)
-		_unit_path.initialize(_walkable_cells)
-		_undobutton.disabled = true
-		_attackbutton.disabled = false
-		
-	else:
-		scope_attack()
-
-## Deselects the active unit, clearing the cells overlay and interactive path drawing.
-func _deselect_active_unit() -> void:
-	_active_unit.is_selected = false
-	_unit_overlay.clear()
-	_unit_path.stop()
 
 
-## Clears the reference to the _active_unit and the corresponding walkable cells.
-func _clear_active_unit() -> void:
-	_active_unit = null
-	_walkable_cells.clear()
-
-
-## Selects or moves a unit based on where the cursor is.
 func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 	if _attack_path.target_selected == true && _attack_mode == true:
 		_target_unit = _units[cell]
@@ -207,36 +271,15 @@ func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 			_move_active_unit(cell)
 
 
-## Updates the interactive path's drawing if there's an active and selected unit.
 func _on_Cursor_moved(new_cell: Vector2) -> void:
 	if _attack_mode == true:
 		_attack_path.draw(_last_moved_unit.cell, new_cell)
 	elif _active_unit and _active_unit.is_selected:
 		_unit_path.draw(_active_unit.cell, new_cell)
 
-func get_last_moved_unit() -> Unit:
-	return _last_moved_unit
-		
-func _play_attack() -> void:
-	var action_data: ActionData
-	action_data = _last_moved_unit.actions[0]
-	var _targets = []
-	_targets.append(_target_unit)	
-	var action = AttackAction.new(action_data, _last_moved_unit, _targets)
 
-	_last_moved_unit.act(action)
-	yield(_last_moved_unit, "action_finished")
-	_last_moved_unit.set_deactivated(true)
-	_attack_mode = false
-	_reinitialize()
-	
-func _clear_attack_scoping() -> void:	
-	_attack_overlay.clear()
-	_attack_path.stop()
-	_undobutton.disabled = true
-	_attackbutton.disabled = true
-	_unit_path.initialize([])
-	
+		
+
 	
 	
 	
