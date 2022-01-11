@@ -3,7 +3,7 @@ extends BattlerAI
 
 
 func _choose_action(info: Dictionary) -> ActionData:
-	print(info)
+	#print(info)
 	return info.strongest_action
 
 

@@ -112,29 +112,26 @@ func end_turn()-> void:
 
 func _play_ai_turn() -> void:
 	for unit in _enemy_units:
+		var t = Timer.new()
+		t.set_wait_time(1)
+		t.set_one_shot(true)
+		self.add_child(t)
+		t.start()
+		yield(t, "timeout")
+		_active_unit = unit
 		var result: Dictionary = unit.get_ai().choose()
 		var action_data: ActionData
 		var targets := []
 		action_data = result.action
 		targets = result.targets
 		approach_enemy(unit, targets[0])
-		#print("%s attacks %s with action %s" % [unit.name, targets[0].name,  action_data.label])
+		if unit.position.x > targets[0].position.x:
+			unit.flip_sprite(true)
+		t.start()
+		yield(t, "timeout")
+		_play_attack(action_data, unit, targets[0])
 
-func approach_enemy(unit: Unit, enemy_unit: Unit) -> Vector2:
-	var move_range = get_walkable_cells(unit)
-	var enemy_location = enemy_unit.cell
-	var distances = {}
-	var result:Vector2
-	for cell in move_range:
-		distances[cell] = cell.distance_to(enemy_location)
-	result = distances[0]
-	for cell in distances.keys():
-		if cell.value < result.distance_to(enemy_location):
-			result = cell
-	print(distances)
-	print(result)
-	return result
-	
+
 	
 func _select_unit(cell: Vector2) -> void:
 	if not _units.has(cell):
@@ -182,15 +179,14 @@ func scope_attack()-> void:
 		_enemy_unit_cells.append(unit)
 	_attack_path.initialize(_range, _enemy_unit_cells, _friendly_unit_cells, _last_moved_unit.cell)
 
-func _play_attack() -> void:
-	var action_data: ActionData
-	action_data = _last_moved_unit.actions[0]
+func _play_attack(action_data: ActionData, unit: Unit, target: Unit ) -> void:
+	action_data = unit.actions[0]
 	var _targets = []
-	_targets.append(_target_unit)	
-	var action = AttackAction.new(action_data, _last_moved_unit, _targets)
-	_last_moved_unit.act(action)
+	_targets.append(target)	
+	var action = AttackAction.new(action_data, unit, _targets)
+	unit.act(action)
 	yield(_last_moved_unit, "action_finished")
-	_last_moved_unit.set_deactivated(true)
+	unit.set_deactivated(true)
 	_attack_mode = false
 	_reinitialize()
 	
@@ -242,27 +238,45 @@ func _flood_fill(cell: Vector2, max_distance: int) -> Array:
 			stack.append(coordinates)
 	return array
 
+func approach_enemy(unit: Unit, enemy_unit: Unit) -> void:
+	_walkable_cells = get_walkable_cells(unit)
+	var enemy_location = enemy_unit.cell
+	var distances = {}
+	var result:Vector2
+	for cell in _walkable_cells:
+		distances[cell] = cell.distance_to(enemy_location)
+	result = unit.cell
+	for cell in distances.keys():
+		if cell.distance_to(enemy_location) < result.distance_to(enemy_location):
+			result = cell
+	_move_active_unit(result)
 
 func _move_active_unit(new_cell: Vector2) -> void:
 	if is_occupied(new_cell) or not new_cell in _walkable_cells:
+		print("Is occupied:")
 		return
 	_active_unit_starting_position = grid.calculate_map_position(_active_unit.cell)
 	_last_moved_unit = _active_unit
 	_units.erase(_active_unit.cell)
 	_units[new_cell] = _active_unit
 	_deselect_active_unit()
-	_active_unit.walk_along(_unit_path.current_path)
-	yield(_active_unit, "walk_finished")	
+	if _active_unit.is_friendly():
+		_active_unit.walk_along(_unit_path.current_path)
+		yield(_active_unit, "walk_finished")
+	else:
+		_active_unit.walk_along([_active_unit.cell, new_cell])
+		yield(_active_unit, "walk_finished")
 	_clear_active_unit()
 	_undobutton.disabled = false
 
 
 
 func _on_Cursor_accept_pressed(cell: Vector2) -> void:
+	print(_active_unit)
 	if _attack_path.target_selected == true && _attack_mode == true:
 		_target_unit = _units[cell]
-		print("_target_unit", _target_unit)
-		_play_attack()
+		var action_data: ActionData
+		_play_attack(action_data, _last_moved_unit, _target_unit)
 		_clear_attack_scoping()
 	else:
 		if not _active_unit:

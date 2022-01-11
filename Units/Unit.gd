@@ -169,4 +169,5 @@ func walk_along(path: PoolVector2Array) -> void:
 	cell = path[-1]
 	self._is_walking = true
 
-
+func flip_sprite(value: bool) -> void:
+	_sprite.set_flip_h( value )
