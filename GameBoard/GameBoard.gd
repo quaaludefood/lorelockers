@@ -29,39 +29,36 @@ onready var _undobutton: Button = get_node("../UI/Interface/Buttons/UndoButton")
 
 ####Generic functions
 func _ready() -> void:
+	_reinitialize()
 	_is_player_turn = true
 	_attackbutton.connect("attack_pressed", self, "scope_attack")
 	_endturnbutton.connect("endturn_pressed", self, "end_turn")
 	_undobutton.connect("undo_pressed", self, "undo_move")
-
 	_undobutton.disabled = true
 	_attackbutton.disabled = true
 	
+
+	
+func _reinitialize() -> void:
+	_enemy_units.clear()
+	_friendly_units.clear()
+	_units.clear()
 	var all_units = []
 	for child in get_children():
 		var unit := child as Unit
 		if not unit:
 			continue
-		all_units.append(unit)
-		if unit.is_friendly():
-			_friendly_units.append(unit)
-		else:
-			_enemy_units.append(unit)
-		
-	for unit in all_units:
-		unit.setup(all_units)
+		if unit.stats.health > 0: 
+			all_units.append(unit)
+			if unit.is_friendly():
+				_friendly_units.append(unit)
+			else:
+				_enemy_units.append(unit)
 
-	for unit in _friendly_units:
+	for unit in all_units:
 		_units[unit.cell] = unit
-	for unit in _enemy_units:
-		_units[unit.cell] = unit
-	
-func _reinitialize() -> void:
-	_units.clear()
-	for unit in _friendly_units:
-		_units[unit.cell] = unit
-	for unit in _enemy_units:
-		_units[unit.cell] = unit
+		unit.setup(all_units)
+		
 		
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_released("debug_info"):
@@ -103,6 +100,7 @@ func get_walkable_cells(unit: Unit) -> Array:
 func end_turn()-> void:	
 	_clear_attack_scoping()
 	_clear_active_unit()
+	_reinitialize()
 	for unit in _units.values():
 		unit.set_deactivated(false)
 	 
@@ -111,6 +109,7 @@ func end_turn()-> void:
 		_play_ai_turn()
 
 func _play_ai_turn() -> void:
+	print(_enemy_units)
 	for unit in _enemy_units:
 		var t = Timer.new()
 		t.set_wait_time(1)
@@ -119,7 +118,8 @@ func _play_ai_turn() -> void:
 		t.start()
 		yield(t, "timeout")
 		_active_unit = unit
-		var result: Dictionary = unit.get_ai().choose()
+		print(_active_unit)
+		var result: Dictionary = _active_unit.get_ai().choose()
 		var action_data: ActionData
 		var targets := []
 		action_data = result.action
@@ -130,6 +130,7 @@ func _play_ai_turn() -> void:
 		t.start()
 		yield(t, "timeout")
 		_play_attack(action_data, unit, targets[0])
+		_reinitialize()
 
 
 	

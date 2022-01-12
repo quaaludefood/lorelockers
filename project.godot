@@ -54,11 +54,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Units/AI/UnitAI.gd"
 }, {
-"base": "Node",
-"class": "CombatAction",
-"language": "GDScript",
-"path": "res://CombatAction/CombatAction.gd"
-}, {
 "base": "Node2D",
 "class": "Cursor",
 "language": "GDScript",
@@ -129,7 +124,6 @@ _global_script_class_icons={
 "AttackOverlay": "",
 "AttackPath": "",
 "BattlerAI": "",
-"CombatAction": "",
 "Cursor": "",
 "EndTurnButton": "",
 "Formulas": "",

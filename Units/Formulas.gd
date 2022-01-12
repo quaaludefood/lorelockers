@@ -9,7 +9,7 @@ static func calculate_potential_damage(action_data, attacker) -> float:
 
 static func calculate_base_damage(action_data, attacker, defender) -> int:
 	var damage: float = calculate_potential_damage(action_data, attacker)
-	damage -= defender.stats.defense
+	#damage -= defender.stats.defense
 	return int(clamp(damage, 1.0, 999.0))
 
 static func calculate_hit_chance(action_data, attacker, defender) -> float:

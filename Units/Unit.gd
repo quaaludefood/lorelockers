@@ -149,9 +149,11 @@ func take_hit(hit: Hit) -> void:
 func _take_damage(amount: int) -> void:
 	stats.health -= amount
 	_health_display.text = str(stats.health)
+		
 	
 func _on_BattlerStats_health_depleted() -> void:
-	set_deactivated(true)
+	print(name, " fainted!")
+	self.queue_free()
 	
 ###Movement functions
 		
