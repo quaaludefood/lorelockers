@@ -19,6 +19,7 @@ export var skin_offset := Vector2.ZERO setget set_skin_offset
 export var move_speed := 600.0
 export var stats: Resource
 export var ai_scene: PackedScene
+export var profile_picture: Texture
 
 var cell := Vector2.ZERO setget set_cell
 var is_selected := false setget set_is_selected
@@ -52,6 +53,8 @@ func _get_configuration_warning() -> String:
 		warning = "You need a UnitStats resource for this node to work."
 	if not actions:
 		warning = "You need an [Attack].tres resource for this node to work."
+	if not profile_picture:
+		warning = "You need to quick load a profile picture resource for this node to work."
 	return warning
 
 func setup(battlers: Array) -> void:

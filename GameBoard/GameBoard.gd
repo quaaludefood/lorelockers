@@ -23,9 +23,10 @@ onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _unit_path: UnitPath = $UnitPath
 onready var _attack_path: AttackPath = $AttackPath
 
-onready var _attackbutton: Button = get_node("../UI/Interface/Buttons/AttackButton")
+onready var _attackbutton: Button = get_node("../UI/Interface/Attacks/AttackButton")
 onready var _endturnbutton: Button = get_node("../UI/Interface/Buttons/EndTurnButton")
 onready var _undobutton: Button = get_node("../UI/Interface/Buttons/UndoButton")
+onready var _profileimage: TextureRect = get_node("../UI/Interface/Profile/TextureRect/ProfileImage")
 
 ####Generic functions
 func _ready() -> void:
@@ -101,9 +102,9 @@ func end_turn()-> void:
 	_clear_attack_scoping()
 	_clear_active_unit()
 	_reinitialize()
+	_profileimage.texture = load("res://Units/static.png")
 	for unit in _units.values():
-		unit.set_deactivated(false)
-	 
+		unit.set_deactivated(false)	 
 	_is_player_turn = not _is_player_turn
 	if _is_player_turn == false:
 		_play_ai_turn()
@@ -118,6 +119,7 @@ func _play_ai_turn() -> void:
 		t.start()
 		yield(t, "timeout")
 		_active_unit = unit
+		_profileimage.texture = load(_active_unit.profile_picture.resource_path)
 		print(_active_unit)
 		var result: Dictionary = _active_unit.get_ai().choose()
 		var action_data: ActionData
@@ -145,6 +147,9 @@ func _select_unit(cell: Vector2) -> void:
 	_last_moved_unit = _units[cell]
 	_active_unit = _units[cell]
 	_active_unit.is_selected = true
+	print(_active_unit.profile_picture.resource_path)
+	print(_profileimage.texture)	
+	_profileimage.texture = load(_active_unit.profile_picture.resource_path)
 	
 	if _active_unit.can_move:
 		_walkable_cells = get_walkable_cells(_active_unit)

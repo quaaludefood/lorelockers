@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=29 format=2]
 
 [ext_resource path="res://GameBoard/Cursor/Cursor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Units/Unit.tscn" type="PackedScene" id=2]
@@ -14,11 +14,12 @@
 [ext_resource path="res://WorldCamera.gd" type="Script" id=12]
 [ext_resource path="res://UnitOverlay/AttackOverlay.tscn" type="PackedScene" id=13]
 [ext_resource path="res://GameBoard/Attack/AttackPath.tscn" type="PackedScene" id=14]
-[ext_resource path="res://Units/Stats/squirrel_stats.tres" type="Resource" id=15]
+[ext_resource path="res://Units/Stats/UnitStats.gd" type="Script" id=15]
 [ext_resource path="res://Units/Actions/Attacks/basic_attack.tres" type="Resource" id=16]
 [ext_resource path="res://Units/AI/AggressiveUnitAI.tscn" type="PackedScene" id=17]
-[ext_resource path="res://Units/Stats/bear_stats.tres" type="Resource" id=18]
-[ext_resource path="res://Units/Stats/cat_stats.tres" type="Resource" id=19]
+[ext_resource path="res://Units/bear_profile.png" type="Texture" id=18]
+[ext_resource path="res://Units/squirrel_profile.png" type="Texture" id=19]
+[ext_resource path="res://Units/bugcat_profile.png" type="Texture" id=20]
 
 [sub_resource type="Curve2D" id=3]
 resource_local_to_scene = true
@@ -26,17 +27,62 @@ _data = {
 "points": PoolVector2Array(  )
 }
 
+[sub_resource type="Resource" id=4]
+script = ExtResource( 15 )
+max_health = 20.0
+base_attack = 50.0
+base_defense = 0.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
 [sub_resource type="Curve2D" id=2]
 resource_local_to_scene = true
 _data = {
 "points": PoolVector2Array(  )
 }
 
+[sub_resource type="Resource" id=5]
+script = ExtResource( 15 )
+max_health = 10.0
+base_attack = 50.0
+base_defense = 0.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
+[sub_resource type="Resource" id=6]
+script = ExtResource( 15 )
+max_health = 10.0
+base_attack = 50.0
+base_defense = 0.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
+[sub_resource type="Resource" id=7]
+script = ExtResource( 15 )
+max_health = 10.0
+base_attack = 50.0
+base_defense = 0.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
+
 [sub_resource type="Curve2D" id=1]
 resource_local_to_scene = true
 _data = {
 "points": PoolVector2Array(  )
 }
+
+[sub_resource type="Resource" id=8]
+script = ExtResource( 15 )
+max_health = 100.0
+base_attack = 100.0
+base_defense = 0.0
+base_speed = 70.0
+base_hit_chance = 100.0
+base_evasion = 0.0
 
 [node name="Main" type="Node2D"]
 
@@ -66,7 +112,8 @@ actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 7 )
 move_range = 5
 skin_offset = Vector2( 6, 17 )
-stats = ExtResource( 15 )
+stats = SubResource( 4 )
+profile_picture = ExtResource( 19 )
 
 [node name="Cat1" parent="GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 850.293, 412.465 )
@@ -75,8 +122,9 @@ actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 9 )
 move_range = 4
 skin_offset = Vector2( 5, 12 )
-stats = ExtResource( 19 )
+stats = SubResource( 5 )
 ai_scene = ExtResource( 17 )
+profile_picture = ExtResource( 20 )
 
 [node name="Cat2" parent="GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 750.293, 200 )
@@ -85,8 +133,9 @@ actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 9 )
 move_range = 4
 skin_offset = Vector2( 5, 12 )
-stats = ExtResource( 19 )
+stats = SubResource( 6 )
 ai_scene = ExtResource( 17 )
+profile_picture = ExtResource( 20 )
 
 [node name="Cat3" parent="GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 650.293, 412.465 )
@@ -95,8 +144,9 @@ actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 9 )
 move_range = 4
 skin_offset = Vector2( 5, 12 )
-stats = ExtResource( 19 )
+stats = SubResource( 7 )
 ai_scene = ExtResource( 17 )
+profile_picture = ExtResource( 20 )
 
 [node name="Bear" parent="GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 200, 480 )
@@ -105,7 +155,8 @@ actions = [ ExtResource( 16 ) ]
 skin = ExtResource( 8 )
 move_range = 3
 skin_offset = Vector2( 2, 9 )
-stats = ExtResource( 18 )
+stats = SubResource( 8 )
+profile_picture = ExtResource( 18 )
 
 [node name="WorldCamera" type="Camera2D" parent="."]
 anchor_mode = 0
