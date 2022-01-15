@@ -306,14 +306,10 @@ func display_attack_buttons() -> void:
 	if len(_active_unit.actions) > 1:
 		_attackbutton_2.visible = true
 		_attackbutton_2.get_node("Label").bbcode_text = "[center]" +_active_unit.actions[1].label + "[/center]"
+		_attackbutton_2.connect("attack_pressed", self, "scope_attack")
 	if len(_active_unit.actions) > 2:
 		_attackbutton_3.visible = true
 		_attackbutton_3.get_node("Label").bbcode_text = "[center]" +_active_unit.actions[2].label + "[/center]"
-
-	
-	
-		
-#	_attackbutton_2.connect("attack_pressed", self, "scope_attack")
-#	_attackbutton_3.connect("attack_pressed", self, "scope_attack")
+		_attackbutton_3.connect("attack_pressed", self, "scope_attack")
 	
 	
