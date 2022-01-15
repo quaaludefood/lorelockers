@@ -175,16 +175,19 @@ func _clear_active_unit() -> void:
 ###Battle functions
 func scope_attack(attack_number: int)-> void:
 	print("selected attack number: ", attack_number )
-	_attack_mode = true
-	var _max_range: int = 4
-	var _range := []
-	var _enemy_unit_cells := []
-	var _friendly_unit_cells := []
-	_range = _flood_fill(_last_moved_unit.cell, _max_range) 
-	_attack_overlay.draw(_range)
-	for unit in _units:
-		_enemy_unit_cells.append(unit)
-	_attack_path.initialize(_range, _enemy_unit_cells, _friendly_unit_cells, _last_moved_unit.cell)
+	var action_data = _last_moved_unit.actions[attack_number - 1]
+	if action_data.is_spawning:
+		_spawn_unit()
+	else:
+		_attack_mode = true
+		var _range := []
+		var _enemy_unit_cells := []
+		var _friendly_unit_cells := []
+		_range = _flood_fill(_last_moved_unit.cell, action_data.max_range) 
+		_attack_overlay.draw(_range)
+		for unit in _units:
+			_enemy_unit_cells.append(unit)
+		_attack_path.initialize(_range, _enemy_unit_cells, _friendly_unit_cells, _last_moved_unit.cell)
 
 func _play_attack(action_data: ActionData, unit: Unit, target: Unit ) -> void:
 	action_data = unit.actions[0]
@@ -203,6 +206,8 @@ func _clear_attack_scoping() -> void:
 	_undobutton.disabled = true
 	_unit_path.initialize([])
 			
+func _spawn_unit() -> void:	
+	print("spawning...")
 ###Movement functions
 	
 func undo_move()-> void:	
