@@ -23,7 +23,10 @@ onready var _attack_overlay: AttackOverlay = $AttackOverlay
 onready var _unit_path: UnitPath = $UnitPath
 onready var _attack_path: AttackPath = $AttackPath
 
-onready var _attackbutton: Button = get_node("../UI/Interface/Attacks/AttackButton")
+onready var _attackbutton_1: Button = get_node("../UI/Interface/Attacks/AttackButton_1")
+onready var _attackbutton_2: Button = get_node("../UI/Interface/Attacks/AttackButton_2")
+onready var _attackbutton_3: Button = get_node("../UI/Interface/Attacks/AttackButton_3")
+onready var _attackbuttoncontainer: HBoxContainer = get_node("../UI/Interface/Attacks")
 onready var _endturnbutton: Button = get_node("../UI/Interface/Buttons/EndTurnButton")
 onready var _undobutton: Button = get_node("../UI/Interface/Buttons/UndoButton")
 onready var _profileimage: TextureRect = get_node("../UI/Interface/Profile/TextureRect/ProfileImage")
@@ -32,11 +35,9 @@ onready var _profileimage: TextureRect = get_node("../UI/Interface/Profile/Textu
 func _ready() -> void:
 	_reinitialize()
 	_is_player_turn = true
-	_attackbutton.connect("attack_pressed", self, "scope_attack")
 	_endturnbutton.connect("endturn_pressed", self, "end_turn")
 	_undobutton.connect("undo_pressed", self, "undo_move")
 	_undobutton.disabled = true
-	_attackbutton.disabled = true
 	
 
 	
@@ -55,7 +56,8 @@ func _reinitialize() -> void:
 				_friendly_units.append(unit)
 			else:
 				_enemy_units.append(unit)
-
+	for button in _attackbuttoncontainer.get_children():
+		button.visible = false
 	for unit in all_units:
 		_units[unit.cell] = unit
 		unit.setup(all_units)
@@ -147,19 +149,18 @@ func _select_unit(cell: Vector2) -> void:
 	_last_moved_unit = _units[cell]
 	_active_unit = _units[cell]
 	_active_unit.is_selected = true
-	print(_active_unit.profile_picture.resource_path)
-	print(_profileimage.texture)	
 	_profileimage.texture = load(_active_unit.profile_picture.resource_path)
+	display_attack_buttons()
+	
 	
 	if _active_unit.can_move:
 		_walkable_cells = get_walkable_cells(_active_unit)
 		_unit_overlay.draw(_walkable_cells)
 		_unit_path.initialize(_walkable_cells)
 		_undobutton.disabled = true
-		_attackbutton.disabled = false
-		
+
 	else:
-		scope_attack()
+		scope_attack(1)
 
 func _deselect_active_unit() -> void:
 	_active_unit.is_selected = false
@@ -172,8 +173,8 @@ func _clear_active_unit() -> void:
 	_walkable_cells.clear()
 
 ###Battle functions
-func scope_attack()-> void:
-	
+func scope_attack(attack_number: int)-> void:
+	print("selected attack number: ", attack_number )
 	_attack_mode = true
 	var _max_range: int = 4
 	var _range := []
@@ -200,7 +201,6 @@ func _clear_attack_scoping() -> void:
 	_attack_overlay.clear()
 	_attack_path.stop()
 	_undobutton.disabled = true
-	_attackbutton.disabled = true
 	_unit_path.initialize([])
 			
 ###Movement functions
@@ -279,6 +279,7 @@ func _move_active_unit(new_cell: Vector2) -> void:
 
 func _on_Cursor_accept_pressed(cell: Vector2) -> void:
 	print(_active_unit)
+	print(_attackbutton_1)
 	if _attack_path.target_selected == true && _attack_mode == true:
 		_target_unit = _units[cell]
 		var action_data: ActionData
@@ -297,11 +298,22 @@ func _on_Cursor_moved(new_cell: Vector2) -> void:
 	elif _active_unit and _active_unit.is_selected:
 		_unit_path.draw(_active_unit.cell, new_cell)
 
+func display_attack_buttons() -> void:
+	if len(_active_unit.actions) > 0:
+		_attackbutton_1.visible = true
+		_attackbutton_1.get_node("Label").bbcode_text = "[center]" + _active_unit.actions[0].label + "[/center]"
+		_attackbutton_1.connect("attack_pressed", self, "scope_attack")
+	if len(_active_unit.actions) > 1:
+		_attackbutton_2.visible = true
+		_attackbutton_2.get_node("Label").bbcode_text = "[center]" +_active_unit.actions[1].label + "[/center]"
+	if len(_active_unit.actions) > 2:
+		_attackbutton_3.visible = true
+		_attackbutton_3.get_node("Label").bbcode_text = "[center]" +_active_unit.actions[2].label + "[/center]"
 
+	
+	
 		
-
-	
-	
-	
+#	_attackbutton_2.connect("attack_pressed", self, "scope_attack")
+#	_attackbutton_3.connect("attack_pressed", self, "scope_attack")
 	
 	

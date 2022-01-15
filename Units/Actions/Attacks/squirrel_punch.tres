@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource( 1 )
-label = "Basic"
+label = "Squirrel punch"
 is_targeting_self = false
 is_targeting_all = false
 damage_multiplier = 1.0

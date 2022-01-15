@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://GameBoard/Cursor/Cursor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Units/Unit.tscn" type="PackedScene" id=2]
@@ -20,6 +20,9 @@
 [ext_resource path="res://Units/bear_profile.png" type="Texture" id=18]
 [ext_resource path="res://Units/squirrel_profile.png" type="Texture" id=19]
 [ext_resource path="res://Units/bugcat_profile.png" type="Texture" id=20]
+[ext_resource path="res://Units/Actions/Attacks/squirrel_spawn.tres" type="Resource" id=21]
+[ext_resource path="res://Units/Actions/Attacks/bear_crush.tres" type="Resource" id=22]
+[ext_resource path="res://Units/Actions/Attacks/bear_claw.tres" type="Resource" id=23]
 
 [sub_resource type="Curve2D" id=3]
 resource_local_to_scene = true
@@ -108,7 +111,7 @@ light_mask = 0
 [node name="Squirrel" parent="GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 355.298, 298.556 )
 curve = SubResource( 3 )
-actions = [ ExtResource( 16 ) ]
+actions = [ ExtResource( 16 ), ExtResource( 21 ) ]
 skin = ExtResource( 7 )
 move_range = 5
 skin_offset = Vector2( 6, 17 )
@@ -151,7 +154,7 @@ profile_picture = ExtResource( 20 )
 [node name="Bear" parent="GameBoard" instance=ExtResource( 2 )]
 position = Vector2( 200, 480 )
 curve = SubResource( 1 )
-actions = [ ExtResource( 16 ) ]
+actions = [ ExtResource( 16 ), ExtResource( 22 ), ExtResource( 23 ) ]
 skin = ExtResource( 8 )
 move_range = 3
 skin_offset = Vector2( 2, 9 )

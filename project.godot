@@ -39,6 +39,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://UserInterface/Buttons/AttackButton.gd"
 }, {
+"base": "Button",
+"class": "AttackButton_2",
+"language": "GDScript",
+"path": "res://UserInterface/Buttons/AttackButton_2.gd"
+}, {
+"base": "Button",
+"class": "AttackButton_3",
+"language": "GDScript",
+"path": "res://UserInterface/Buttons/AttackButton_3.gd"
+}, {
 "base": "TileMap",
 "class": "AttackOverlay",
 "language": "GDScript",
@@ -121,6 +131,8 @@ _global_script_class_icons={
 "AttackAction": "",
 "AttackActionData": "",
 "AttackButton": "",
+"AttackButton_2": "",
+"AttackButton_3": "",
 "AttackOverlay": "",
 "AttackPath": "",
 "BattlerAI": "",

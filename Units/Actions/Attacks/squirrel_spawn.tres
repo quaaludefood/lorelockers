@@ -4,9 +4,9 @@
 
 [resource]
 script = ExtResource( 1 )
-label = "Basic"
+label = "Squirrel spawn"
 is_targeting_self = false
 is_targeting_all = false
 damage_multiplier = 1.0
 hit_chance = 100.0
-is_spawning = false
+is_spawning = true
